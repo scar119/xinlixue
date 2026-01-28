@@ -67,7 +67,7 @@ export async function loginAction(formData: FormData) {
  * 登出 Action
  */
 export async function logoutAction() {
-  const { logout } = await import('@/lib/auth')
+  const { logout } = await import('@/src/lib/auth')
 
   await logout()
 
