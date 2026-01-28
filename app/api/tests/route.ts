@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { db } from '@/src/db'
 import { tests } from '@/src/db/schema'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const testsList = await db.select().from(tests)
