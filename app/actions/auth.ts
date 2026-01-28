@@ -1,7 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { login, register } from '@/lib/auth'
+import { login, register } from '@/src/lib/auth'
 import { cookies } from 'next/headers'
 
 /**
