@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowLeft, Trophy, Sparkles, ClipboardCheck, Settings, User, Crown } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Navigation } from "@/components/navigation"
 
 export default function ProfilePage() {
   const mockUser = {
@@ -32,18 +33,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-bg">
       {/* 导航栏 */}
-      <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 text-gray-700 hover:text-primary-600">
-              <ArrowLeft className="w-5 h-5" />
-              返回首页
-            </Link>
-            <h1 className="text-xl font-bold">个人中心</h1>
-            <div className="w-20"></div>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       <div className="container mx-auto px-4 py-12 max-w-5xl">
         {/* 用户信息卡片 */}

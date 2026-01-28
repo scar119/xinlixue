@@ -2,6 +2,7 @@ import Link from "next/link"
 import { Gamepad2, Trophy, Users, Clock, ArrowRight } from "lucide-react"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Navigation } from "@/components/navigation"
 
 const games = [
   {
@@ -76,38 +77,7 @@ export default function GamesPage() {
   return (
     <div className="min-h-screen bg-gradient-bg">
       {/* 导航栏 */}
-      <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <Gamepad2 className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-bold text-xl">心语AI</span>
-            </Link>
-            <div className="hidden md:flex items-center gap-6">
-              <Link href="/" className="text-gray-700 hover:text-primary-600 transition">
-                首页
-              </Link>
-              <Link href="/kuakua" className="text-gray-700 hover:text-primary-600 transition">
-                夸夸AI
-              </Link>
-              <Link href="/tests" className="text-gray-700 hover:text-primary-600 transition">
-                心理测试
-              </Link>
-              <Link href="/games" className="text-primary-600 font-medium">
-                心理游戏
-              </Link>
-            </div>
-            <Link
-              href="/login"
-              className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
-            >
-              登录
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       <div className="container mx-auto px-4 py-12">
         {/* 页面标题 */}
