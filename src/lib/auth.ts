@@ -173,12 +173,12 @@ export async function register(email: string, password: string, nickname?: strin
   }).returning()
 
   // 创建会话
-  const token = await createToken({ userId: newUser.id })
+  const token = await createToken({ userId: newUser[0].id })
   const expiresAt = new Date()
   expiresAt.setDate(expiresAt.getDate() + 7)
 
   await db.insert(sessions).values({
-    userId: newUser.id,
+    userId: newUser[0].id,
     token,
     expiresAt,
   })
@@ -187,10 +187,10 @@ export async function register(email: string, password: string, nickname?: strin
     success: true,
     token,
     user: {
-      id: newUser.id,
-      email: newUser.email,
-      nickname: newUser.nickname,
-      subscriptionType: newUser.subscriptionType,
+      id: newUser[0].id,
+      email: newUser[0].email,
+      nickname: newUser[0].nickname,
+      subscriptionType: newUser[0].subscriptionType,
     },
   }
 }
