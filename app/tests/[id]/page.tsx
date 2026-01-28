@@ -105,7 +105,7 @@ export default async function TestPage({ params }: TestPageProps) {
           <CardContent className="space-y-3">
             <div className="flex items-start gap-3">
               <ChevronRight className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
-              <p>本测试共 {test.questions?.length || 0} 道题目</p>
+              <p>本测试共 {(test.questions as any)?.length || 0} 道题目</p>
             </div>
             <div className="flex items-start gap-3">
               <ChevronRight className="w-5 h-5 text-primary-600 mt-0.5 flex-shrink-0" />
