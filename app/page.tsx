@@ -1,50 +1,12 @@
 import Link from "next/link";
 import { Sparkles, ClipboardCheck, BookOpen, ArrowRight } from "lucide-react";
+import { Navigation } from "@/components/navigation";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-bg">
       {/* 导航栏 */}
-      <nav className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-bold text-xl">心语AI</span>
-            </div>
-            <div className="hidden md:flex items-center gap-6">
-              <Link href="/" className="text-gray-700 hover:text-primary-600 transition">
-                首页
-              </Link>
-              <Link href="/kuakua" className="text-gray-700 hover:text-primary-600 transition">
-                夸夸AI
-              </Link>
-              <Link href="/tests" className="text-gray-700 hover:text-primary-600 transition">
-                心理测试
-              </Link>
-              <Link href="/theories" className="text-gray-700 hover:text-primary-600 transition">
-                理论知识
-              </Link>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/login"
-                className="px-4 py-2 text-gray-700 hover:text-primary-600 transition"
-              >
-                登录
-              </Link>
-              <Link
-                href="/register"
-                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
-              >
-                注册
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero 区域 */}
       <section className="py-20 px-4">
