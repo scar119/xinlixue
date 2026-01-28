@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { db } from "@/src/db"
 import { theories } from "@/src/db/schema"
 
+export const dynamic = 'force-dynamic'
+
 async function getTheories() {
   try {
     return await db.select().from(theories)

@@ -7,6 +7,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { ArrowLeft, Clock, Users, ChevronRight } from "lucide-react"
 import { eq as eqImport } from "drizzle-orm"
 
+export const dynamic = 'force-dynamic'
+
 interface TestPageProps {
   params: {
     id: string

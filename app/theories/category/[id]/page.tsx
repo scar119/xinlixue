@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button"
 import { db } from "@/src/db"
 import { theories } from "@/src/db/schema"
 
+export const dynamic = 'force-dynamic'
+
 interface CategoryPageProps {
   params: {
     id: string
