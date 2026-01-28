@@ -6,6 +6,8 @@ import { TestTaker } from "@/components/test-taker"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 
+export const dynamic = 'force-dynamic'
+
 interface TakeTestPageProps {
   params: {
     id: string
