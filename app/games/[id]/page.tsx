@@ -270,6 +270,8 @@ function CognitiveReframeGame() {
   const [challengeThought, setChallengeThought] = useState("")
   const [reframeThought, setReframeThought] = useState("")
   const [showExample, setShowExample] = useState(false)
+  const [analysis, setAnalysis] = useState<GameAnalysis | null>(null)
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
 
   const examples = [
     {
@@ -290,12 +292,33 @@ function CognitiveReframeGame() {
     }
   }
 
+  const fetchAIAnalysis = async () => {
+    setIsLoadingAnalysis(true)
+    try {
+      const response = await fetch('/api/game/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameType: 'cognitive-reframe',
+          gameData: { negativeThought, challengeThought, reframeThought }
+        })
+      })
+      const data = await response.json()
+      if (data.success) setAnalysis(data.analysis)
+    } catch (error) {
+      console.error('AI分析失败:', error)
+    } finally {
+      setIsLoadingAnalysis(false)
+    }
+  }
+
   const resetGame = () => {
     setCurrentStep(0)
     setNegativeThought("")
     setChallengeThought("")
     setReframeThought("")
     setShowExample(false)
+    setAnalysis(null)
   }
 
   const steps = [
@@ -366,25 +389,37 @@ function CognitiveReframeGame() {
         </div>
 
         {showExample && (
-          <div className="bg-gradient-bg p-6 rounded-xl">
-            <h4 className="font-bold mb-4">📝 认知重构示例</h4>
-            <div className="space-y-4">
-              {examples.map((example, index) => (
-                <div key={index} className="bg-white p-4 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-1">
-                    {index === 0 ? "示例1：" : "示例2："}
-                  </p>
-                  <p className="mb-2"><strong>消极想法：</strong>{example.negative}</p>
-                  <p className="mb-2"><strong>挑战：</strong>{example.challenge}</p>
-                  <p><strong>重新构建：</strong><span className="text-green-600">{example.reframe}</span></p>
-                </div>
-              ))}
+          <>
+            <div className="bg-gradient-bg p-6 rounded-xl">
+              <h4 className="font-bold mb-4">📝 认知重构示例</h4>
+              <div className="space-y-4">
+                {examples.map((example, index) => (
+                  <div key={index} className="bg-white p-4 rounded-lg">
+                    <p className="text-sm text-gray-600 mb-1">
+                      {index === 0 ? "示例1：" : "示例2："}
+                    </p>
+                    <p className="mb-2"><strong>消极想法：</strong>{example.negative}</p>
+                    <p className="mb-2"><strong>挑战：</strong>{example.challenge}</p>
+                    <p><strong>重新构建：</strong><span className="text-green-600">{example.reframe}</span></p>
+                  </div>
+                ))}
+              </div>
             </div>
+
+            {isLoadingAnalysis ? (
+              <div className="py-8 text-center">
+                <Loader2 className="w-8 h-8 text-primary-600 mx-auto mb-4 animate-spin" />
+                <p className="text-gray-600">AI 正在分析你的练习...</p>
+              </div>
+            ) : analysis ? (
+              <AIAnalysisResult analysis={analysis} />
+            ) : null}
+
             <Button onClick={resetGame} className="w-full mt-6">
               <RotateCcw className="w-4 h-4 mr-2" />
               重新开始
             </Button>
-          </div>
+          </>
         )}
       </Card>
     </div>
@@ -395,6 +430,47 @@ function CognitiveReframeGame() {
 function GratitudeJournalGame() {
   const [entries, setEntries] = useState(["", "", ""])
   const [showResult, setShowResult] = useState(false)
+  const [analysis, setAnalysis] = useState<GameAnalysis | null>(null)
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
+
+  const handleEntryChange = (index: number, value: string) => {
+    const newEntries = [...entries]
+    newEntries[index] = value
+    setEntries(newEntries)
+  }
+
+  const handleSubmit = () => {
+    if (entries.every(e => e.trim())) {
+      setShowResult(true)
+      fetchAIAnalysis()
+    }
+  }
+
+  const fetchAIAnalysis = async () => {
+    setIsLoadingAnalysis(true)
+    try {
+      const response = await fetch('/api/game/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameType: 'gratitude-journal',
+          gameData: { entries }
+        })
+      })
+      const data = await response.json()
+      if (data.success) setAnalysis(data.analysis)
+    } catch (error) {
+      console.error('AI分析失败:', error)
+    } finally {
+      setIsLoadingAnalysis(false)
+    }
+  }
+
+  const resetGame = () => {
+    setEntries(["", "", ""])
+    setShowResult(false)
+    setAnalysis(null)
+  }
 
   const handleEntryChange = (index: number, value: string) => {
     const newEntries = [...entries]
@@ -419,9 +495,20 @@ function GratitudeJournalGame() {
         <Card className="p-8 text-center">
           <div className="text-6xl mb-4">🙏</div>
           <h2 className="text-3xl font-bold mb-4">感恩日记已完成！</h2>
-          <p className="text-gray-600 mb-6">
-            记录感恩的事情可以帮助你建立积极的心态。建议每天坚持练习！
-          </p>
+
+          {isLoadingAnalysis ? (
+            <div className="py-8">
+              <Loader2 className="w-8 h-8 text-primary-600 mx-auto mb-4 animate-spin" />
+              <p className="text-gray-600">AI 正在分析你的感恩日记...</p>
+            </div>
+          ) : analysis ? (
+            <AIAnalysisResult analysis={analysis} />
+          ) : (
+            <p className="text-gray-600 mb-6">
+              记录感恩的事情可以帮助你建立积极的心态。建议每天坚持练习！
+            </p>
+          )}
+
           <div className="bg-gradient-bg p-6 rounded-xl mb-6 text-left">
             <h4 className="font-bold mb-4">今天你感恩的三件事：</h4>
             <div className="space-y-3">
@@ -487,6 +574,8 @@ function MindfulnessBreathingGame() {
   const [count, setCount] = useState(4)
   const [rounds, setRounds] = useState(0)
   const [showIntro, setShowIntro] = useState(true)
+  const [analysis, setAnalysis] = useState<GameAnalysis | null>(null)
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
 
   useEffect(() => {
     if (!isActive) return
@@ -507,6 +596,7 @@ function MindfulnessBreathingGame() {
           setRounds((prev) => {
             if (prev >= 3) {
               setIsActive(false)
+              fetchAIAnalysis()  // 触发AI分析
               return prev
             }
             return prev + 1
@@ -520,12 +610,33 @@ function MindfulnessBreathingGame() {
     return () => clearInterval(interval)
   }, [isActive, phase])
 
+  const fetchAIAnalysis = async () => {
+    setIsLoadingAnalysis(true)
+    try {
+      const response = await fetch('/api/game/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameType: 'mindfulness-breathing',
+          gameData: { rounds }
+        })
+      })
+      const data = await response.json()
+      if (data.success) setAnalysis(data.analysis)
+    } catch (error) {
+      console.error('AI分析失败:', error)
+    } finally {
+      setIsLoadingAnalysis(false)
+    }
+  }
+
   const resetGame = () => {
     setIsActive(false)
     setPhase("inhale")
     setCount(4)
     setRounds(0)
     setShowIntro(true)
+    setAnalysis(null)
   }
 
   if (rounds >= 3) {
@@ -534,9 +645,20 @@ function MindfulnessBreathingGame() {
         <Card className="p-8 text-center">
           <div className="text-6xl mb-4">🧘</div>
           <h2 className="text-3xl font-bold mb-4">正念练习完成！</h2>
-          <p className="text-gray-600 mb-6">
-            你完成了3轮4-7-8呼吸法。感觉如何？建议每天练习5-10分钟。
-          </p>
+
+          {isLoadingAnalysis ? (
+            <div className="py-8">
+              <Loader2 className="w-8 h-8 text-primary-600 mx-auto mb-4 animate-spin" />
+              <p className="text-gray-600">AI 正在分析你的练习...</p>
+            </div>
+          ) : analysis ? (
+            <AIAnalysisResult analysis={analysis} />
+          ) : (
+            <p className="text-gray-600 mb-6">
+              你完成了3轮4-7-8呼吸法。感觉如何？建议每天练习5-10分钟。
+            </p>
+          )}
+
           <Button onClick={resetGame} className="w-full">
             再练习一次
           </Button>
@@ -638,6 +760,8 @@ function ValueRankingGame() {
   const [currentStep, setCurrentStep] = useState(0)
   const [comparing, setComparing] = useState<[typeof values[0], typeof values[0]] | null>(null)
   const [showResult, setShowResult] = useState(false)
+  const [analysis, setAnalysis] = useState<GameAnalysis | null>(null)
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
 
   const startGame = () => {
     const shuffled = [...values].sort(() => Math.random() - 0.5)
@@ -645,6 +769,27 @@ function ValueRankingGame() {
     setCurrentStep(0)
     setComparing([shuffled[0], shuffled[1]])
     setShowResult(false)
+    setAnalysis(null)
+  }
+
+  const fetchAIAnalysis = async () => {
+    setIsLoadingAnalysis(true)
+    try {
+      const response = await fetch('/api/game/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameType: 'value-ranking',
+          gameData: { rankedValues }
+        })
+      })
+      const data = await response.json()
+      if (data.success) setAnalysis(data.analysis)
+    } catch (error) {
+      console.error('AI分析失败:', error)
+    } finally {
+      setIsLoadingAnalysis(false)
+    }
   }
 
   const handleSelect = (selected: typeof values[0]) => {
@@ -656,6 +801,7 @@ function ValueRankingGame() {
     if (remaining.length === 0) {
       setRankedValues(newRanked)
       setShowResult(true)
+      fetchAIAnalysis()  // 触发AI分析
       return
     }
 
@@ -702,6 +848,16 @@ function ValueRankingGame() {
               了解自己的价值观可以帮助你做出更符合内心的决定。
             </p>
           </div>
+
+          {isLoadingAnalysis ? (
+            <div className="py-8">
+              <Loader2 className="w-8 h-8 text-primary-600 mx-auto mb-4 animate-spin" />
+              <p className="text-gray-600">AI 正在分析你的价值观...</p>
+            </div>
+          ) : analysis ? (
+            <AIAnalysisResult analysis={analysis} />
+          ) : null}
+
           <Button onClick={startGame} className="w-full mt-4">
             <RotateCcw className="w-4 h-4 mr-2" />
             重新测试
@@ -763,10 +919,33 @@ function GoalSettingGame() {
   const [steps, setSteps] = useState(["", "", ""])
   const [timeline, setTimeline] = useState("")
   const [showResult, setShowResult] = useState(false)
+  const [analysis, setAnalysis] = useState<GameAnalysis | null>(null)
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
 
   const handleSubmit = () => {
     if (goal && steps.every(s => s.trim()) && timeline) {
       setShowResult(true)
+      fetchAIAnalysis()
+    }
+  }
+
+  const fetchAIAnalysis = async () => {
+    setIsLoadingAnalysis(true)
+    try {
+      const response = await fetch('/api/game/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameType: 'goal-setting',
+          gameData: { goal, steps, timeline }
+        })
+      })
+      const data = await response.json()
+      if (data.success) setAnalysis(data.analysis)
+    } catch (error) {
+      console.error('AI分析失败:', error)
+    } finally {
+      setIsLoadingAnalysis(false)
     }
   }
 
@@ -774,6 +953,9 @@ function GoalSettingGame() {
     setGoal("")
     setSteps(["", "", ""])
     setTimeline("")
+    setShowResult(false)
+    setAnalysis(null)
+  }
     setShowResult(false)
   }
 
@@ -788,6 +970,15 @@ function GoalSettingGame() {
               已设定完成！将这个目标保存下来，开始行动吧！
             </p>
           </div>
+
+          {isLoadingAnalysis ? (
+            <div className="py-8">
+              <Loader2 className="w-8 h-8 text-primary-600 mx-auto mb-4 animate-spin" />
+              <p className="text-gray-600">AI 正在分析你的目标...</p>
+            </div>
+          ) : analysis ? (
+            <AIAnalysisResult analysis={analysis} />
+          ) : null}
 
           <div className="bg-gradient-bg p-6 rounded-xl mb-6">
             <div className="mb-4">
