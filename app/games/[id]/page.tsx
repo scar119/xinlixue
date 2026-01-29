@@ -432,9 +432,16 @@ function CognitiveReframeGame() {
               </div>
             ) : analysis ? (
               <AIAnalysisResult analysis={analysis} />
-            ) : null}
+            ) : (
+              <Button
+                onClick={() => fetchAIAnalysis()}
+                className="w-full mt-6"
+              >
+                完成并查看AI分析
+              </Button>
+            )}
 
-            <Button onClick={resetGame} className="w-full mt-6">
+            <Button onClick={resetGame} className="w-full mt-4">
               <RotateCcw className="w-4 h-4 mr-2" />
               重新开始
             </Button>
@@ -798,22 +805,29 @@ function ValueRankingGame() {
     if (!comparing) return
 
     const newRanked = [...rankedValues, selected]
-    const remaining = values.filter(v => !newRanked.includes(v))
 
+    // 先更新已排序的值
+    setRankedValues(newRanked)
+
+    // 计算剩余的值
+    const remaining = values.filter(v => !newRanked.includes(v))
+    console.log('已排序:', newRanked.length, '剩余:', remaining.length, '剩余值:', remaining)
+
+    // 如果没有剩余了，显示结果
     if (remaining.length === 0) {
-      setRankedValues(newRanked)
       setShowResult(true)
-      fetchAIAnalysis()  // 触发AI分析
+      fetchAIAnalysis()
       return
     }
 
+    // 如果只剩一个，自动加入并显示结果
     if (remaining.length === 1) {
       setRankedValues([...newRanked, remaining[0]])
       setShowResult(true)
       return
     }
 
-    setRankedValues(newRanked)
+    // 否则，设置下一对比较
     setComparing([remaining[0], remaining[1]])
   }
 
