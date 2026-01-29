@@ -10,10 +10,11 @@ import { Card } from "@/components/ui/card"
 
 // AI 分析结果类型
 interface GameAnalysis {
-  summary: string
-  strengths: string[]
-  suggestions: string[]
-  encouragement: string
+  fullText?: string  // 优先使用完整文本
+  summary?: string
+  strengths?: string[]
+  suggestions?: string[]
+  encouragement?: string
 }
 
 // AI 分析组件
@@ -25,41 +26,59 @@ function AIAnalysisResult({ analysis }: { analysis: GameAnalysis }) {
         <h3 className="text-lg font-bold text-primary-600">AI 个性化分析</h3>
       </div>
 
-      <div className="space-y-4">
-        <div>
-          <h4 className="font-semibold mb-2">📊 分析结果</h4>
-          <p className="text-gray-700">{analysis.summary}</p>
+      {analysis.fullText ? (
+        // 显示完整的AI文本（支持Markdown格式）
+        <div className="prose prose-sm max-w-none">
+          <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+            {analysis.fullText}
+          </div>
         </div>
+      ) : (
+        // 向后兼容：显示结构化数据
+        <div className="space-y-4">
+          {analysis.summary && (
+            <div>
+              <h4 className="font-semibold mb-2">📊 分析结果</h4>
+              <p className="text-gray-700">{analysis.summary}</p>
+            </div>
+          )}
 
-        <div>
-          <h4 className="font-semibold mb-2">✨ 你的优势</h4>
-          <ul className="space-y-1">
-            {analysis.strengths.map((strength, index) => (
-              <li key={index} className="text-gray-700 flex items-start gap-2">
-                <span className="text-primary-600 mt-1">•</span>
-                <span>{strength}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+          {analysis.strengths && analysis.strengths.length > 0 && (
+            <div>
+              <h4 className="font-semibold mb-2">✨ 你的优势</h4>
+              <ul className="space-y-1">
+                {analysis.strengths.map((strength, index) => (
+                  <li key={index} className="text-gray-700 flex items-start gap-2">
+                    <span className="text-primary-600 mt-1">•</span>
+                    <span>{strength}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-        <div>
-          <h4 className="font-semibold mb-2">💡 成长建议</h4>
-          <ul className="space-y-1">
-            {analysis.suggestions.map((suggestion, index) => (
-              <li key={index} className="text-gray-700 flex items-start gap-2">
-                <span className="text-secondary-600 mt-1">•</span>
-                <span>{suggestion}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+          {analysis.suggestions && analysis.suggestions.length > 0 && (
+            <div>
+              <h4 className="font-semibold mb-2">💡 成长建议</h4>
+              <ul className="space-y-1">
+                {analysis.suggestions.map((suggestion, index) => (
+                  <li key={index} className="text-gray-700 flex items-start gap-2">
+                    <span className="text-secondary-600 mt-1">•</span>
+                    <span>{suggestion}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-        <div className="bg-white/50 p-4 rounded-lg">
-          <h4 className="font-semibold mb-2">🌟 鼓励话语</h4>
-          <p className="text-gray-700 italic">{analysis.encouragement}</p>
+          {analysis.encouragement && (
+            <div className="bg-white/50 p-4 rounded-lg">
+              <h4 className="font-semibold mb-2">🌟 鼓励话语</h4>
+              <p className="text-gray-700 italic">{analysis.encouragement}</p>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </Card>
   )
 }
@@ -470,23 +489,6 @@ function GratitudeJournalGame() {
     setEntries(["", "", ""])
     setShowResult(false)
     setAnalysis(null)
-  }
-
-  const handleEntryChange = (index: number, value: string) => {
-    const newEntries = [...entries]
-    newEntries[index] = value
-    setEntries(newEntries)
-  }
-
-  const handleSubmit = () => {
-    if (entries.every(e => e.trim())) {
-      setShowResult(true)
-    }
-  }
-
-  const resetGame = () => {
-    setEntries(["", "", ""])
-    setShowResult(false)
   }
 
   if (showResult) {
@@ -955,8 +957,6 @@ function GoalSettingGame() {
     setTimeline("")
     setShowResult(false)
     setAnalysis(null)
-  }
-    setShowResult(false)
   }
 
   if (showResult) {
