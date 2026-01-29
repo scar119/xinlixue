@@ -4,7 +4,8 @@ import { db } from "@/src/db"
 import { theories } from "@/src/db/schema"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Clock, BookOpen } from "lucide-react"
+import { ArrowLeft, Clock } from "lucide-react"
+import { ViewCountTracker } from "@/components/view-count-tracker"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeRaw from 'rehype-raw'
@@ -100,10 +101,7 @@ export default async function TheoryPage({ params }: TheoryPageProps) {
               <Clock className="w-4 h-4" />
               <span>阅读时间：约 {theory.readTime} 分钟</span>
             </div>
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4" />
-              <span>{theory.viewCount || 0} 次阅读</span>
-            </div>
+            <ViewCountTracker articleId={theory.id} initialCount={theory.viewCount || 0} />
           </div>
         </div>
 
