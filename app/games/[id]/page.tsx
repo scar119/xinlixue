@@ -804,31 +804,37 @@ function ValueRankingGame() {
   const handleSelect = (selected: typeof values[0]) => {
     if (!comparing) return
 
-    const newRanked = [...rankedValues, selected]
+    // 使用ID来追踪，避免对象引用问题
+    const selectedId = selected.id
+    const newRankedIds = [...rankedValues.map(v => v.id), selectedId]
 
-    // 先更新已排序的值
-    setRankedValues(newRanked)
+    // 找出剩余的值
+    const remainingValues = values.filter(v => !newRankedIds.includes(v.id))
 
-    // 计算剩余的值
-    const remaining = values.filter(v => !newRanked.includes(v))
-    console.log('已排序:', newRanked.length, '剩余:', remaining.length, '剩余值:', remaining)
+    console.log('选择:', selected.name)
+    console.log('已排序IDs:', newRankedIds)
+    console.log('剩余值:', remainingValues.map(v => v.name))
 
     // 如果没有剩余了，显示结果
-    if (remaining.length === 0) {
+    if (remainingValues.length === 0) {
+      setRankedValues([...rankedValues, selected])
       setShowResult(true)
       fetchAIAnalysis()
       return
     }
 
     // 如果只剩一个，自动加入并显示结果
-    if (remaining.length === 1) {
-      setRankedValues([...newRanked, remaining[0]])
+    if (remainingValues.length === 1) {
+      setRankedValues([...rankedValues, selected, remainingValues[0]])
       setShowResult(true)
       return
     }
 
-    // 否则，设置下一对比较
-    setComparing([remaining[0], remaining[1]])
+    // 更新已排序的值
+    setRankedValues([...rankedValues, selected])
+
+    // 设置下一对比较
+    setComparing([remainingValues[0], remainingValues[1]])
   }
 
   if (showResult) {
