@@ -4,7 +4,7 @@ import { db } from "@/src/db"
 import { theories } from "@/src/db/schema"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Clock } from "lucide-react"
+import { ArrowLeft, Clock, BookOpen } from "lucide-react"
 import { ViewCountTracker } from "@/components/view-count-tracker"
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
