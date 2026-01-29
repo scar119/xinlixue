@@ -1660,7 +1660,7 @@ CBT不是要你"想得开一点"，而是教你用证据和逻辑来检验自己
   ]
 
   for (const article of theoryArticles) {
-    await db.insert(theories).values(article).onConflictDoNothing()
+    await db.insert(theories).values(article).onConflictDoNothing({ target: theories.title })
   }
 
   console.log('✅ 理论知识表已初始化')
