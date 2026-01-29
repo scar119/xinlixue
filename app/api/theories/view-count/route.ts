@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/src/db'
 import { theories } from '@/src/db/schema'
-import { eq, sql } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,19 +16,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 更新文章阅读次数
-    const updatedArticles = await db
-      .update(theories)
-      .set({ viewCount: sql \`view_count + 1\` })
+    // 先获取当前阅读次数
+    const article = await db
+      .select()
+      .from(theories)
       .where(eq(theories.id, articleId))
-      .returning()
+      .limit(1)
 
-    if (updatedArticles.length === 0) {
+    if (article.length === 0) {
       return NextResponse.json(
         { success: false, error: '文章不存在' },
         { status: 404 }
       )
     }
+
+    // 更新阅读次数
+    const updatedArticles = await db
+      .update(theories)
+      .set({ viewCount: (article[0].viewCount || 0) + 1 })
+      .where(eq(theories.id, articleId))
+      .returning()
 
     return NextResponse.json({
       success: true,

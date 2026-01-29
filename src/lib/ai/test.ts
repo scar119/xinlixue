@@ -242,43 +242,44 @@ function getSystemPromptForTest(testName: string): string {
   if (testName.includes('心理年龄')) {
     return `${BASE_ROLE}
 ### 当前任务
-用户刚完成心理年龄测试。结果：{{mentalAge}}岁（实际年龄：{{actualAge}}岁）
+用户刚完成心理年龄测试。结果：{{mentalAge}}岁
 
-### 差异解读（范畴化）
-**心理年龄 < 实际年龄**：
-- 含义：保持童心、好奇心、活力
-- 优势：创造力、学习力、乐观心态
-- 术语："年轻态"（非"不成熟"）
+### 心理年龄解读（范畴化）
+**年轻态（15-25岁）**：
+- 特征：好奇心强、追求新鲜感、行动力强
+- 优势：创造力、学习力、适应变化、乐观心态
+- 场景：创意工作、新项目探索
 
-**心理年龄 ≈ 实际年龄**：
-- 含义：身心一致、稳重、适应良好
-- 优势：可靠、成熟、决策力
+**成熟态（26-40岁）**：
+- 特征：稳重理性、目标导向、善于规划
+- 优势：决策力、执行力、危机处理、团队协作
+- 场景：项目管理、重要决策、领导工作
 
-**心理年龄 > 实际年龄**：
-- 含义：早熟、经历丰富、超越同龄
-- 优势：智慧、深度、领导力
-- 注意：允许自己"年轻"一点，享受简单快乐
+**智慧态（41岁以上）**：
+- 特征：洞察力深、内心平和、注重意义
+- 优势：智慧、深度、指导能力、情绪稳定
+- 场景：咨询指导、人生规划、复杂人际
 
 ### 本质洞察（抽象化）
 - 心理年龄 ≠ 成熟度指标，而是"心理能量特征"
 - 每种年龄都有可爱之处和适应场景
-- 理想状态：保持核心特质的灵活性
+- 关键：了解自己的特征，在不同场景发挥优势
 
-### 成长建议（结构化：接纳→整合→表达）
+### 成长建议（结构化：接纳→灵活）
 **接纳自己的心理年龄**：
 - 这是你的独特优势，无需改变
-- 例：年轻态→创意优势；成熟态→智慧优势
+- 年轻态是创意和活力的源泉
+- 成熟态是可靠和执行力的保证
+- 智慧态是洞察和稳定的根基
 
-**整合不同年龄段的特质**：
-- 年轻态可以学习必要的成熟技能
-- 成熟态可以保留童心和好奇心
-
-**在不同场景灵活切换**：
-- 工作需要成熟态，朋友间可以年轻态
+**场景化应用**：
+- 工作中：发挥你心理年龄的优势特质
+- 生活中：可以适当"调整"，比如年轻态可以学习规划
+- 人际中：理解不同心理年龄的人的差异
 
 ### 约束条件
 - 语气：轻松有趣，幽默调侃
-- 避免："你心理年龄小=不成熟"
+- 避免：让用户觉得自己的心理年龄"不够好"
 - 可以调侃：但必须是善意的，让用户会心一笑
 - 字数：250-350字
 - 结尾：轻松愉快
@@ -354,6 +355,132 @@ function getSystemPromptForTest(testName: string): string {
 }
 
 /**
+ * 计算测试分数和结果数据
+ */
+function calculateTestResult(
+  testName: string,
+  answers: Record<string, string>,
+  questions?: any[]
+): Record<string, any> {
+  const result: Record<string, any> = {}
+
+  if (!questions) {
+    return result
+  }
+
+  // 心理年龄测试
+  if (testName.includes('心理年龄')) {
+    let totalAgeScore = 0
+    let count = 0
+    questions.forEach(q => {
+      const answer = answers[q.id]
+      const option = q.options?.find((opt: any) => opt.label === answer)
+      if (option?.ageScore) {
+        totalAgeScore += option.ageScore
+        count++
+      }
+    })
+    result.mentalAge = count > 0 ? Math.round(totalAgeScore / count) : 25
+  }
+
+  // GAD-7 焦虑自评量表
+  if (testName.includes('GAD-7') || testName.includes('焦虑')) {
+    let totalScore = 0
+    questions.forEach(q => {
+      const answer = answers[q.id]
+      const option = q.options?.find((opt: any) => opt.label === answer)
+      if (option?.score !== undefined) {
+        totalScore += option.score
+      }
+    })
+    result.score = totalScore
+  }
+
+  // PHQ-9 抑郁自评量表
+  if (testName.includes('PHQ-9') || testName.includes('抑郁')) {
+    let totalScore = 0
+    questions.forEach(q => {
+      const answer = answers[q.id]
+      const option = q.options?.find((opt: any) => opt.label === answer)
+      if (option?.score !== undefined) {
+        totalScore += option.score
+      }
+    })
+    result.score = totalScore
+  }
+
+  // 大五人格测试
+  if (testName.includes('大五人格') || testName.includes('人格')) {
+    // 假设题目按维度分组，这里简化处理
+    let totalScore = 0
+    questions.forEach(q => {
+      const answer = answers[q.id]
+      const option = q.options?.find((opt: any) => opt.label === answer)
+      if (option?.score !== undefined) {
+        totalScore += option.score
+      }
+    })
+    result.scores = `${Math.round(totalScore / questions.length)}分左右（各维度均衡）`
+  }
+
+  // 情绪类型测试
+  if (testName.includes('情绪类型') || testName.includes('性格')) {
+    const typeCounts: Record<string, number> = {}
+    questions.forEach(q => {
+      const answer = answers[q.id]
+      const option = q.options?.find((opt: any) => opt.label === answer)
+      if (option?.type) {
+        typeCounts[option.type] = (typeCounts[option.type] || 0) + 1
+      }
+    })
+    const topType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]
+    const typeNames: Record<string, string> = {
+      'A': '热情表达型',
+      'B': '内敛深沉型',
+      'C': '理性平衡型',
+      'D': '敏感丰富型'
+    }
+    result.emotionType = typeNames[topType?.[0] || 'A'] || '热情表达型'
+  }
+
+  // 压力来源测试
+  if (testName.includes('压力')) {
+    const sourceCounts: Record<string, number> = {}
+    questions.forEach(q => {
+      const answer = answers[q.id]
+      const option = q.options?.find((opt: any) => opt.label === answer)
+      if (option?.source) {
+        sourceCounts[option.source] = (sourceCounts[option.source] || 0) + 1
+      }
+    })
+    const topSources = Object.entries(sourceCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(e => e[0])
+    const sourceNames: Record<string, string> = {
+      'work': '工作压力',
+      'relationship': '人际压力',
+      'financial': '经济压力',
+      'future': '未来不确定性'
+    }
+    result.stressSources = topSources.map(s => sourceNames[s]).join('、')
+  }
+
+  return result
+}
+
+/**
+ * 替换系统提示词中的占位符
+ */
+function replacePlaceholders(template: string, data: Record<string, any>): string {
+  let result = template
+  for (const [key, value] of Object.entries(data)) {
+    result = result.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), String(value))
+  }
+  return result
+}
+
+/**
  * 分析测试答案并生成报告
  */
 export async function analyzeTestAnswers(
@@ -368,6 +495,9 @@ export async function analyzeTestAnswers(
   }
 
   try {
+    // 计算测试结果
+    const testResult = calculateTestResult(testName, answers, questions)
+
     // 构建用户答案摘要
     let answersText = ''
     if (questions) {
@@ -383,7 +513,10 @@ export async function analyzeTestAnswers(
     }
 
     // 根据测试名称生成个性化系统提示词
-    const systemPrompt = getSystemPromptForTest(testName)
+    let systemPrompt = getSystemPromptForTest(testName)
+
+    // 替换占位符
+    systemPrompt = replacePlaceholders(systemPrompt, testResult)
 
     const response = await fetch(DEEPSEEK_API_URL, {
       method: 'POST',
