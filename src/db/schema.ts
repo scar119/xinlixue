@@ -85,7 +85,7 @@ export const userAchievements = pgTable('user_achievements', {
  */
 export const theories = pgTable('theories', {
   id: uuid('id').defaultRandom().primaryKey(),
-  title: text('title').notNull(),
+  title: text('title').notNull().unique(),
   description: text('description').notNull(), // 摘要
   content: text('content').notNull(), // Markdown 格式内容
   category: text('category').notNull(), // cognitive, emotional, social, growth 等
