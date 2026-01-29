@@ -101,3 +101,4 @@ source/
 # ------------------------------------
 .claude/cache/
 .claude/history/
+.vercel

@@ -2,11 +2,67 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { ArrowLeft, RotateCcw } from "lucide-react"
+import { ArrowLeft, RotateCcw, Loader2, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Navigation } from "@/components/navigation"
 import { Card } from "@/components/ui/card"
+
+// AI 分析结果类型
+interface GameAnalysis {
+  summary: string
+  strengths: string[]
+  suggestions: string[]
+  encouragement: string
+}
+
+// AI 分析组件
+function AIAnalysisResult({ analysis }: { analysis: GameAnalysis }) {
+  return (
+    <Card className="p-6 mt-6 border-primary-200 bg-gradient-to-r from-primary-50 to-transparent">
+      <div className="flex items-center gap-2 mb-4">
+        <Sparkles className="w-5 h-5 text-primary-600" />
+        <h3 className="text-lg font-bold text-primary-600">AI 个性化分析</h3>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <h4 className="font-semibold mb-2">📊 分析结果</h4>
+          <p className="text-gray-700">{analysis.summary}</p>
+        </div>
+
+        <div>
+          <h4 className="font-semibold mb-2">✨ 你的优势</h4>
+          <ul className="space-y-1">
+            {analysis.strengths.map((strength, index) => (
+              <li key={index} className="text-gray-700 flex items-start gap-2">
+                <span className="text-primary-600 mt-1">•</span>
+                <span>{strength}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="font-semibold mb-2">💡 成长建议</h4>
+          <ul className="space-y-1">
+            {analysis.suggestions.map((suggestion, index) => (
+              <li key={index} className="text-gray-700 flex items-start gap-2">
+                <span className="text-secondary-600 mt-1">•</span>
+                <span>{suggestion}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="bg-white/50 p-4 rounded-lg">
+          <h4 className="font-semibold mb-2">🌟 鼓励话语</h4>
+          <p className="text-gray-700 italic">{analysis.encouragement}</p>
+        </div>
+      </div>
+    </Card>
+  )
+}
 
 // 游戏数据
 const gamesData: Record<number, any> = {
@@ -66,6 +122,8 @@ function EmotionCardsGame() {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
   const [shuffledEmotions] = useState(() => [...emotions].sort(() => Math.random() - 0.5))
   const [currentEmotion, setCurrentEmotion] = useState(shuffledEmotions[0])
+  const [analysis, setAnalysis] = useState<GameAnalysis | null>(null)
+  const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false)
 
   const totalRounds = 6
 
@@ -85,8 +143,32 @@ function EmotionCardsGame() {
         setIsCorrect(null)
       } else {
         setShowResult(true)
+        // 触发AI分析
+        fetchAIAnalysis()
       }
     }, 1500)
+  }
+
+  const fetchAIAnalysis = async () => {
+    setIsLoadingAnalysis(true)
+    try {
+      const response = await fetch('/api/game/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gameType: 'emotion-cards',
+          gameData: { score, totalRounds, correctCount: score }
+        })
+      })
+      const data = await response.json()
+      if (data.success) {
+        setAnalysis(data.analysis)
+      }
+    } catch (error) {
+      console.error('AI分析失败:', error)
+    } finally {
+      setIsLoadingAnalysis(false)
+    }
   }
 
   const resetGame = () => {
@@ -95,6 +177,7 @@ function EmotionCardsGame() {
     setShowResult(false)
     setSelectedEmotion(null)
     setIsCorrect(null)
+    setAnalysis(null)
     const newShuffled = [...emotions].sort(() => Math.random() - 0.5)
     setCurrentEmotion(newShuffled[0])
   }
@@ -107,11 +190,22 @@ function EmotionCardsGame() {
           <h2 className="text-3xl font-bold mb-4">游戏结束！</h2>
           <p className="text-xl mb-2">你的得分</p>
           <p className="text-5xl font-bold text-primary-600 mb-4">{score} / {totalRounds}</p>
-          <p className="text-gray-600 mb-6">
-            {score === totalRounds ? "完美！你是情绪识别大师！" :
-             score >= 4 ? "很不错！继续练习会更好！" :
-             "继续加油，多关注情绪表达会帮助你进步！"}
-          </p>
+
+          {isLoadingAnalysis ? (
+            <div className="py-8">
+              <Loader2 className="w-8 h-8 text-primary-600 mx-auto mb-4 animate-spin" />
+              <p className="text-gray-600">AI 正在分析你的表现...</p>
+            </div>
+          ) : analysis ? (
+            <AIAnalysisResult analysis={analysis} />
+          ) : (
+            <p className="text-gray-600 mb-6">
+              {score === totalRounds ? "完美！你是情绪识别大师！" :
+               score >= 4 ? "很不错！继续练习会更好！" :
+               "继续加油，多关注情绪表达会帮助你进步！"}
+            </p>
+          )}
+
           <Button onClick={resetGame} className="w-full">
             <RotateCcw className="w-4 h-4 mr-2" />
             再玩一次
